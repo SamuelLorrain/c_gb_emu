@@ -1,7 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "ppu.h"
-#define isLcdOnMacro(p) (p->ram[LCD_CONTROL] & 0b10000000) == 0b1000000
+#define isLcdOnMacro(p) ((p->ram[LCD_CONTROL] & 0b10000000) >> 7)
+
+ppu newPpu() {
+    ppu p;
+    p.onOff = false;
+    p.ram = NULL;
+    p.screen_surface = NULL;
+    p.ticks = 0;
+    p.pixels_drawn_on_current_line = 0;
+    return p;
+}
 
 /* PPU REGISTERS */
 
@@ -47,11 +58,16 @@ ppu_state_mode getLcdStatusMode(ppu* p) {
 }
 
 void tickPpu(ppu* p) {
+    uint8_t yDraw = 0;
+    uint8_t tileLine = 0;
+    uint16_t  tileMapRowAddr = 0;
+
+    // TODO
+    // SHOULD USE ON/OFF
+    // TRIGGERING INSTEAD
     if (!(isLcdOnMacro(p))) {
         return;
     }
-    printf("LCD activated !");
-    exit(0);
 
     // LY == LYC ?
     if (p->ram[LY] == p->ram[LYC]) {
@@ -60,4 +76,53 @@ void tickPpu(ppu* p) {
         p->ram[LCD_STATUS] = p->ram[LCD_STATUS] & 0b11111011;
     }
 
+    switch(getLcdStatusMode(p)) {
+        case hblank:
+            if (p->ticks == 456) {
+                p->ticks = 0;
+                p->ram[LY] += 1;
+                if (p->ram[LY] == 144) {
+                    setLcdStatusMode(p, vblank);
+                } else {
+                    setLcdStatusMode(p, oamsearch);
+                }
+            }
+            break;
+        case vblank:
+            if (p->ticks == 456) {
+                p->ticks = 0;
+                p->ram[LY] += 1;
+                if (p->ram[LY] == 153) {
+                    p->ram[LY] = 0;
+                    // updatescreen();
+                    setLcdStatusMode(p, oamsearch);
+                }
+            }
+            break;
+        case oamsearch:
+            // collect sprite data
+            // SCAN oam (object attribute memory)
+            // from 0xfe00 to 0xfe9f to mix sprit pixels in the current line later
+            if (p->ticks == 20) {
+                p->pixels_drawn_on_current_line = 0;
+                yDraw = p->ram[SCROLL_Y] + p->ram[LY];
+                tileLine = p->ram[LY] % 8;
+                tileMapRowAddr = (0x9800 + (yDraw/8) * 32);
+                // this.fetcher.initForLine(tileMapRowAddr, tileLine);
+                setLcdStatusMode(p, pixeltransfer);
+            }
+            break;
+        case pixeltransfer:
+            /* this.fetcher.tick(); */
+            /* if (this.fetcher.fifo.length() < 8) { */
+            /*     return; */
+            /* } */
+            /* const pixel = this.fetcher.fifo.deque(); */
+            /* this.frameBuffer[(this.ly * LCD_SIZE_X) + this.pixelDrawnsOnCurrentLine] = pixel; */
+            p->pixels_drawn_on_current_line += 1;
+            if (p->pixels_drawn_on_current_line == 160) {
+                setLcdStatusMode(p, hblank);
+            }
+            break;
+    }
 }
