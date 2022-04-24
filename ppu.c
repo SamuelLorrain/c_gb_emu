@@ -4,11 +4,12 @@
 #include "ppu.h"
 #define isLcdOnMacro(p) ((p->ram[LCD_CONTROL] & 0b10000000) >> 7)
 
-ppu newPpu() {
+ppu newPpu(pixel_fetcher* pf) {
     ppu p;
     p.onOff = false;
     p.ram = NULL;
     p.screen_surface = NULL;
+    p.fetcher = pf;
     p.ticks = 0;
     p.pixels_drawn_on_current_line = 0;
     return p;
@@ -108,16 +109,16 @@ void tickPpu(ppu* p) {
                 yDraw = p->ram[SCROLL_Y] + p->ram[LY];
                 tileLine = p->ram[LY] % 8;
                 tileMapRowAddr = (0x9800 + (yDraw/8) * 32);
-                // this.fetcher.initForLine(tileMapRowAddr, tileLine);
+                initForLine(p->fetcher, tileMapRowAddr, tileLine);
                 setLcdStatusMode(p, pixeltransfer);
             }
             break;
         case pixeltransfer:
-            /* this.fetcher.tick(); */
-            /* if (this.fetcher.fifo.length() < 8) { */
-            /*     return; */
-            /* } */
-            /* const pixel = this.fetcher.fifo.deque(); */
+            tickPixelFetcher(p->fetcher);
+            if (p->fetcher->fifo->len < 8) {
+                return;
+            }
+            uint8_t pixel = dequeue(p->fetcher->fifo);
             /* this.frameBuffer[(this.ly * LCD_SIZE_X) + this.pixelDrawnsOnCurrentLine] = pixel; */
             p->pixels_drawn_on_current_line += 1;
             if (p->pixels_drawn_on_current_line == 160) {

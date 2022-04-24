@@ -2,6 +2,7 @@
 #define PPU_H
 #include <stdint.h>
 #include <stdbool.h>
+#include "pixelfetcher.h"
 
 #define LCD_CONTROL 0xff40
 #define LCD_STATUS 0xff41
@@ -19,6 +20,7 @@ typedef enum {
 
 typedef struct {
     bool onOff;
+    pixel_fetcher* fetcher;
     uint8_t* ram;
     uint8_t* screen_surface;
     uint32_t ticks;
@@ -28,6 +30,6 @@ typedef struct {
 void tickPpu(ppu* p);
 void setLcdStatusMode(ppu* p, ppu_state_mode s);
 
-ppu newPpu();
+ppu newPpu(pixel_fetcher* pf);
 
 #endif

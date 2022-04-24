@@ -39,11 +39,13 @@ void loadBootRom(cpu* c) {
 
 int main() {
     long count = 0;
-    cpu c = newCpu();
-    ppu p;
-    int i;
     uint8_t* ram = newRam(RAM_SIZE);
     uint8_t* screen_surface = newRam(SCREEN_SURFACE_WIDTH * SCREEN_SURFACE_HEIGHT);
+    pixel_fifo pfifo = newFifo();
+    pixel_fetcher pfetcher = newPixelFetcher(ram, &pfifo);
+    ppu p = newPpu(&pfetcher);
+    cpu c = newCpu();
+    int i;
     c.ram = ram;
     p.ram = ram;
     p.screen_surface = screen_surface;
@@ -67,5 +69,7 @@ int main() {
     SdlQuitMacro();
     free(ram);
     free(screen_surface);
+    deleteFifo(&pfifo);
+    deletePixelFetcher(&pfetcher);
     return 0;
 }
