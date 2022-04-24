@@ -55,6 +55,8 @@ typedef struct {
     uint8_t* ram;
 } cpu;
 
+cpu newCpu();
+
 int fetchCurrent(cpu* c);
 int fetchNext(cpu* c);
 void tickCpu(cpu* c);

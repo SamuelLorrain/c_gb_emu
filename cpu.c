@@ -6,6 +6,18 @@
 
 #define dRegMacro(c, REGISTER_NAME) printf("%s : 0x%x\n", REGISTER_NAME, c->reg.REGISTER_NAME)
 
+cpu newCpu() {
+    cpu c;
+    c.ram = NULL;
+    c.reg.pc = 0;
+    c.reg.sp = 0;
+    c.reg.af = 0;
+    c.reg.bc = 0;
+    c.reg.de = 0;
+    c.reg.hl = 0;
+    return c;
+}
+
 int fetchCurrent(cpu* c) {
     return c->ram[c->reg.pc];
 }

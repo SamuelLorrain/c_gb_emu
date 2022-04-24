@@ -201,7 +201,7 @@ void execute(cpu* c, uint8_t ins) {
             c->reg.a = x;
             break;
         case (0xe0): // ld ($ff00 + c), a
-            addr = 0xff00 + fetchNext(c);
+            addr = 0xff00 + (fetchNext(c) & 0xff);
             x = c->reg.a;
             c->ram[addr] = x;
             break;

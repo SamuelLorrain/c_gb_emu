@@ -1,4 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "ppu.h"
+#define isLcdOnMacro(p) (p->ram[LCD_CONTROL] & 0b10000000) == 0b1000000
 
 /* PPU REGISTERS */
 
@@ -47,10 +50,14 @@ void tickPpu(ppu* p) {
     if (!(isLcdOnMacro(p))) {
         return;
     }
+    printf("LCD activated !");
+    exit(0);
+
     // LY == LYC ?
     if (p->ram[LY] == p->ram[LYC]) {
         p->ram[LCD_STATUS] = (p->ram[LCD_STATUS] & 0b11111011) | 0b100;
     } else {
         p->ram[LCD_STATUS] = p->ram[LCD_STATUS] & 0b11111011;
     }
+
 }
