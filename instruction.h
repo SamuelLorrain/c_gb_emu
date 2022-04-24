@@ -2,6 +2,7 @@
 #define INSTRUCTION_H
 #include "cpu.h"
 
-int execute(cpu*, uint8_t);
+void execute(cpu*, uint8_t);
+void handleCBinstruction(cpu* c);
 
 #endif

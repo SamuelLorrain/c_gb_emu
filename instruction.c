@@ -6,7 +6,7 @@
 
 #define hasCarryFlag(oldV, v) ((((oldV & 0xf) + (v & 0xf)) & 0x10) == 0x10)
 
-uint8_t handleCBinstruction(cpu* c) {
+void handleCBinstruction(cpu* c) {
     uint8_t currentInstruction = fetchCurrent(c);
     switch(currentInstruction) {
         case (0x7c):
@@ -20,13 +20,12 @@ uint8_t handleCBinstruction(cpu* c) {
             break;
         default:
             printf("Error: 0xcb 0x%x instruction is not implemented\n", currentInstruction);
-            return 2;
+            exit(2);
             break;
     }
-    return 0;
 }
 
-int execute(cpu* c, uint8_t ins) {
+void execute(cpu* c, uint8_t ins) {
     uint8_t x;
     uint8_t y;
     uint16_t addr;
@@ -189,7 +188,7 @@ int execute(cpu* c, uint8_t ins) {
             break;
         case (0xcb):
             c->reg.pc +=1;
-            return handleCBinstruction(c);
+            handleCBinstruction(c);
             break;
         case (0xcd): // CALL a16
             x = fetchNext(c);
@@ -236,12 +235,10 @@ int execute(cpu* c, uint8_t ins) {
             if(x - y < 0) {
                 setFlag(c, 'c', 1);
             }
-
             break;
         default:
             printf("Error: 0x%x instruction is not implemented\n", ins);
-            return 2;
+            exit(2);
             break;
     }
-    return 0;
 }

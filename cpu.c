@@ -15,15 +15,10 @@ int fetchNext(cpu* c) {
     return c->ram[c->reg.pc];
 }
 
-int tickCpu(cpu* c) {
+void tickCpu(cpu* c) {
     uint8_t currentInstruction = fetchCurrent(c);
-    int x = execute(c, currentInstruction);
-    if (x != 0) {
-        return 2;
-    }
-
+    execute(c, currentInstruction);
     c->reg.pc += 1;
-    return 0;
 }
 
 void push(cpu* c, uint16_t value) {
@@ -77,8 +72,7 @@ void setFlag(cpu* c, char flag, bool value) {
             break;
         default:
             printf("Error: trying to access unknown flag");
-            return;
-            break;
+            exit(2);
     }
     if (value) {
         c->reg.f |= (1<<bitOffset);
@@ -106,8 +100,7 @@ bool isFlagSet(cpu* c, char flag) {
             break;
         default:
             printf("Error: trying to access unknown flag");
-            return false;
-            break;
+            exit(2);
     }
     return (c->reg.f & (1 << bitOffset)) >> bitOffset  == 1;
 }

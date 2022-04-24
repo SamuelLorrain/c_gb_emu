@@ -52,16 +52,12 @@ typedef struct {
 
 typedef struct {
     registers reg;
-    uint8_t ram[RAM_SIZE];
+    uint8_t* ram;
 } cpu;
-
-typedef struct {
-
-} instruction;
 
 int fetchCurrent(cpu* c);
 int fetchNext(cpu* c);
-int tickCpu(cpu* c);
+void tickCpu(cpu* c);
 
 void push_16(cpu* c, uint16_t value);
 /* void pop(cpu* c); */
